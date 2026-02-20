@@ -2,7 +2,7 @@
 
 ---
 
-### Feb 20, 2026 @ 7:12 AM
+### Feb 20, 2026 @ 7:12 AM — Intro
 
 Hello!
 
@@ -16,7 +16,7 @@ Most startups will have the below.
 - Monolithic architecture
 - small team of less than 5.
 
-Making it make sense for us to only need a staging environemnt (Which I primarily utilize, while others purely "vibe code" from their local environment), and production environment.
+Making it make sense for us to only need a staging environment (Which I primarily utilize, while others purely "vibe code" from their local environment), and production environment.
 
 Other places I have been at can easily get by with just utilizing Vercel/Railway and be okay.
 
@@ -24,17 +24,15 @@ Other places I have been at can easily get by with just utilizing Vercel/Railway
 
 Knowing this, I will start today, with setting up my environment with AWS CLI & Terraform.
 
-Note: I will be documenting my though processes deeply in this dev-logs folder to provide a way for you to understand how my mind works as I work through out the tasks and its list.
+> Note: I will be documenting my thought processes deeply in this dev-logs folder to provide a way for you to understand how my mind works as I work throughout the tasks and its list.
+
+I am debating if I want to create just 1 file and keep adding onto it as my thought process goes? or have a single index file, and that will reference my progress and thought process, kind of like git commits? We will see as I proceed.
 
 ---
 
-I am debating if I want to create just 1 file and keep adding onto it as my though process goes? or have a single index file, and that will reference my progress and though process, kind of like git commits? We will see as I proceed.
+### Feb 20, 2026 @ 7:28 AM — Local Setup
 
----
-
-### Feb 20, 2026 @ 7:28 AM
-
-**Setup Terraform:**
+#### Setup Terraform
 
 Since my other environments were company laptops. I have to setup everything on my personal space to prepare for this task. I reached an error:
 
@@ -44,7 +42,7 @@ Error: Your Command Line Tools (CLT) does not support macOS 26.
 It is either outdated or was modified.
 ```
 
-- **Cause:** most recent macos doesnt allow brew to install it.
+- **Cause:** most recent macos doesn't allow brew to install it.
 - **Proposed solution:** download the binary directly and install.
 - **Result:** Success.
 
@@ -54,9 +52,7 @@ Terraform v1.14.5
 on darwin_arm64
 ```
 
----
-
-**Setup AWS CLI**
+#### Setup AWS CLI
 
 Running:
 
@@ -72,3 +68,70 @@ aws-snapshot-cleanup % aws --version
 aws-cli/2.33.26 Python/3.13.11 Darwin/25.3.0 exe/arm64
 (base) aphaiboon@Mac-899 aws-snapshot-cleanup %
 ```
+
+---
+
+### Feb 20, 2026 @ 8:15 AM — Brainstorming & Phases
+
+As I am reading the technical exercise document, I think I'll have to break this into phases.
+
+I am also thinking, since I am a visual person, I should create my diagrams now, so I can visually see my phases, and setup.
+
+---
+
+**Phase 0: Setup**
+- Setup Local ✅
+- Create AWS Account & Link to CLI (so I can actually test & confirm my code)
+
+**Phase 1: Project Base & Configuration**
+- Create files/folders for terraform & project.
+- Configure Terraform to connect to AWS account
+
+**Phase 2: VPC Setup**
+- Create VPC
+- Create & connect private subnet.
+
+~~**Phase 3: EC2 & Snapshot Setup**~~
+~~- Setup EC2 Instance in Terraform~~
+~~- Setup automatic EC2 snapshot backups in terraform~~
+
+> **Correction:** After re-reading the exercise, I was overcomplicating this. I don't need to create EC2 instances or set up snapshot backups — that infrastructure already exists. The Lambda's only job is to query whatever snapshots are already there and clean up the old ones. Removed this phase.
+
+**Phase 3: IAM Role**
+- Define IAM role for Lambda with least-privilege permissions.
+- Only needs two things: permission to list snapshots, and permission to delete them.
+
+**Phase 4: Lambda Configuration**
+- Create lambda function to pull ALL snapshots.
+- Before doing anything — check if there are even any snapshots to work with. If there are none, log it and exit cleanly. No reason to proceed if there's nothing there.
+- Create a filter to select backups older than one year.
+- Delete those snapshots, while logging:
+  - Deleting snapshot: [snapshot_id]
+  - Logging success or fail, retries. etc.
+  - Include basic error handling for API calls.
+
+**Phase 5: Daily Scheduler**
+- Setup AWS CloudWatch Event Rule to trigger the Lambda function daily.
+
+**Phase 6: Implement Automated Testing**
+- Install and write automated testing via Moto to confirm code is working as intended.
+
+---
+
+> **Note:** Phase 6 was added after correction above. Ideally I wanted to setup an AWS account to make sure my code actually functions and works as intended. Without additional steps, I think automated testing will be able to at least satisfy our needs.
+>
+> **Note 2:** I still may create an AWS account to confirm everything works as intended. Something irks me about not being able to be 100% certain my code works as intended in a production environment.
+
+---
+
+### Feb 20, 2026 @ 8:15 AM — Architecture Diagrams
+
+Created and attached diagrams.
+
+#### Architecture Overview
+
+![Architecture Diagram](./diagrams/architecture.drawio.png)
+
+#### Lambda Flow
+
+![Lambda Flow Diagram](./diagrams/lambda-flow.drawio.png)
