@@ -136,32 +136,64 @@ Created and attached diagrams.
 
 ![Lambda Flow Diagram](./diagrams/lambda-flow.drawio.png)
 
-
 ---
 
 ### Feb 20, 2026 @ 10:52 AM — Plan Updates
-Rereading the technical excercise document, I realized I am missing 4 things. 
 
-1. Security group for the lambda. 
+Rereading the technical exercise document, I realized I am missing 4 things.
+
+1. Security group for the lambda.
 2. Attaching lambda to the VPC.
 3. Deployment
-4. Documentation 
+4. Documentation
 
-I have moved the plan into a designated plan.md, and also updated the plan to correctly satisfy needs. 
+I have moved the plan into a designated plan.md, and also updated the plan to correctly satisfy needs.
 
 ---
 
 ### Feb 20, 2026 @ 10:52 AM — Phase 1
 
-This phase is to setup all the scaffolding for terraform. I have written the basic code, and made a variables.tf file to be able to replace and utilize variables instead of hardcoding it. 
+This phase is to setup all the scaffolding for terraform. I have written the basic code, and made a variables.tf file to be able to replace and utilize variables instead of hardcoding it.
 
-I have chosen the default zone to be us-east-1 it is the AWS default & this is where AWS releases new services first. If we would like to change it, we can change it via the variables.tf file.
+I have chosen the default zone to be us-east-1 — it is the AWS default & this is where AWS releases new services first. If we would like to change it, we can change it via the variables.tf file.
 
-I also left main.tf and outputs.tf empty for the next phases. 
+I renamed `main.tf` → `vpc.tf` to keep things organized, and left `outputs.tf` empty for the next phases.
 
-Ran ```terraform plan``` and is a success. Moving on.
+Ran `terraform plan` — success. Moving on.
+
+> **Note:** Ran into a git issue — accidentally committed the terraform provider binary cache (648MB). Had to remove it from git history entirely using `git filter-repo`. The `.gitignore` is now correctly set to prevent this going forward.
 
 ---
 
-Ran into a git issue, but had to remove terraform cache from git commit. and not successfully working. 
+### Feb 20, 2026 @ 12:22 AM — Phase 2
 
+Moving on to this phase, I setup the VPC and decided to rename `main` → `vpc.tf`. So its much easier to manage and scan for whatever the user needs. (myself included.)
+
+Running `terraform plan` errored because I didn't have an AWS account configured. Attached an account — here's what I did:
+
+1. Created a personal AWS account
+2. IAM → Create User (`snapshot-cleanup-admin`)
+3. Attached permission policies:
+   - `AmazonVPCFullAccess`
+   - `AWSLambda_FullAccess`
+   - `IAMFullAccess`
+   - `CloudWatchEventsFullAccess`
+   - `AmazonEC2FullAccess`
+4. Went into the new user's security credentials tab
+5. Created an access key for CLI access
+6. Attached keys to CLI via `aws configure`
+
+> **Note:** Deliberately avoided using the root account for credentials. Created a dedicated IAM user with only the permissions needed for this project. Same least-privilege thinking I'm applying to the Lambda's IAM role.
+
+Ran `terraform plan` — successful plan (3 resources to add).
+
+Ran `terraform apply` — everything successful.
+
+```
+Apply complete! Resources: 3 added, 0 changed, 0 destroyed.
+
+Outputs:
+lambda_security_group_id = "sg-0a315fbd3f703feef"
+private_subnet_id        = "subnet-0af15bbe44f41311f"
+vpc_id                   = "vpc-0e1820dc11bffe1a0"
+```
