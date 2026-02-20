@@ -135,3 +135,18 @@ Created and attached diagrams.
 #### Lambda Flow
 
 ![Lambda Flow Diagram](./diagrams/lambda-flow.drawio.png)
+
+
+---
+
+### Feb 20, 2026 @ 10:52 AM — Plan Updates
+Rereading the technical excercise document, I realized I am missing 4 things. 
+
+1. Security group for the lambda. 
+2. Attaching lambda to the VPC.
+3. Deployment
+4. Documentation 
+
+I have moved the plan into a designated plan.md, and also updated the plan to correctly satisfy needs. 
+
+---
