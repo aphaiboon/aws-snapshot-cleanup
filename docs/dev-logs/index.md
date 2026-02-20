@@ -165,7 +165,7 @@ Ran `terraform plan` — success. Moving on.
 
 ---
 
-### Feb 20, 2026 @ 12:22 AM — Phase 2
+### Feb 20, 2026 @ 12:22 PM — Phase 2
 
 Moving on to this phase, I setup the VPC and decided to rename `main` → `vpc.tf`. So its much easier to manage and scan for whatever the user needs. (myself included.)
 
