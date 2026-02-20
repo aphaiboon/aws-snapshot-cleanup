@@ -271,3 +271,32 @@ Created a `scheduler.tf` with three resources.
 Note: Terraform resource is still called `aws_cloudwatch_event_rule` even though aws rebranded to EventBridge.
 
 `terraform apply` - successful. 
+
+---
+
+### Feb 20, 2026 @ 1:29 PM — Phase 6 | Automated Testing
+
+Using pytest + moto to test the handler locally without needing a real AWS account.
+
+`pip install 'moto[ec2]' pytest --break-system-packages`
+
+Had to quote `moto[ec2]` btw — zsh eats the brackets otherwise.
+
+Wrote 4 tests covering every path in the handler:
+1. No snapshots at all — exits cleanly.
+2. Snapshots exist but none are old — exits cleanly.
+3. Old snapshots found — confirms they actually get deleted.
+4. A delete fails mid-loop — confirms the handler keeps going and doesn't crash.
+
+Ran into a few things:
+- `from lambda.handler import handler` throws a SyntaxError. `lambda` is a reserved word in Python so I can't import from a folder named that. Added a `conftest.py` at the root to insert the `lambda/` folder into sys.path. Import becomes `from handler import handler`.
+- This version of moto requires a real volume to exist before you can snapshot it. Had to call `create_volume()` first.
+- `describe_snapshots(OwnerIds=["self"])` in moto returns 1000+ built-in AMI snapshots. Had to assert by snapshot ID instead of counting.
+
+All 4 pass.
+
+```
+4 passed in 3.34s
+```
+
+---
