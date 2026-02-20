@@ -354,3 +354,10 @@ It worked!!
 This really bothered me. I didn't want to finish the project without actually seeing it run on real AWS. So seeing that log line come through is satisfying. No snapshots in the account obviously, but Lambda ran, hit the EC2 API, got a real response, and logged it correctly.
 
 Phase complete.
+
+---
+
+### Feb 20, 2026 @ 3:14 PM — Readme + Architecture Diagram Updates
+I finished the readme, trying to follow the technical excercise needs. Also after debugging, I realized I had to update the architecture diagram. So thats updated. I hope this feature does its job!
+
+Thanks for reading :) 

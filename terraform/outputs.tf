@@ -13,3 +13,7 @@ output "lambda_security_group_id" {
 output "lambda_role_arn" {
   value = aws_iam_role.lambda_role.arn
 }
+
+output "ec2_vpc_endpoint_id" {
+  value = aws_vpc_endpoint.ec2.id
+}
