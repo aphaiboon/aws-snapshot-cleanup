@@ -197,3 +197,18 @@ lambda_security_group_id = "sg-0a315fbd3f703feef"
 private_subnet_id        = "subnet-0af15bbe44f41311f"
 vpc_id                   = "vpc-0e1820dc11bffe1a0"
 ```
+
+### Feb 20, 2026 @ 12:34 PM — Phase 3
+
+This phase we have to setup the IAM role for the Lambda function.
+
+Created `iam.tf` with three resources:
+
+1. **IAM Role** — the role itself, with a trust policy that allows the Lambda function to assume it.
+2. **Inline Policy** — scoped to only the two permissions the Lambda actually needs:
+   - `ec2:DescribeSnapshots`
+   - `ec2:DeleteSnapshot`
+3. **Policy Attachment** — attached AWS managed policy `AWSLambdaVPCAccessExecutionRole`. This handles CloudWatch Logs access and VPC network interface creation so Lambda can actually run inside the VPC.
+
+> **Note:** Ran into a small issue — typed in the wrong resource name `aws_iam_policy` instead of `aws_iam_role_policy`. These are two completely different resources. Caught it before applying. Intellisense eh? haha.
+
