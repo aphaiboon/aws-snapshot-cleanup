@@ -161,3 +161,7 @@ I also left main.tf and outputs.tf empty for the next phases.
 
 Ran ```terraform plan``` and is a success. Moving on.
 
+---
+
+Ran into a git issue, but had to remove terraform cache from git commit. and not successfully working. 
+
