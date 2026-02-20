@@ -198,6 +198,8 @@ private_subnet_id        = "subnet-0af15bbe44f41311f"
 vpc_id                   = "vpc-0e1820dc11bffe1a0"
 ```
 
+---
+
 ### Feb 20, 2026 @ 12:34 PM — Phase 3
 
 This phase we have to setup the IAM role for the Lambda function.
@@ -212,3 +214,45 @@ Created `iam.tf` with three resources:
 
 > **Note:** Ran into a small issue — typed in the wrong resource name `aws_iam_policy` instead of `aws_iam_role_policy`. These are two completely different resources. Caught it before applying. Intellisense eh? haha.
 
+---
+
+### Feb 20, 2026 @ 1:10 PM — Phase 4
+
+Phase 4 is the big one — where the actual Lambda function gets built and wired into everything.
+
+---
+
+**`lambda/handler.py`** — the Python cleanup script.
+
+What it does:
+1. Reads `CUTOFF_DAYS` env variable (defaults to 365 if not set)
+2. Connects to AWS EC2
+3. Pulls snapshots owned by the account using `OwnerIds=["self"]`. If I didn't add this, it would pull other public snapshots from across AWS.
+4. If no snapshots exist at all, logs it and exits cleanly.
+5. Filters snapshots older than the cutoff date using `StartTime`.
+6. If none are old enough, logs and exits.
+7. Loops through old snapshots, attempts to delete each one, logs success or failure per snapshot.
+
+---
+
+**`terraform/lambda.tf`** — wires the Lambda function into the infrastructure.
+
+- Points Terraform to the Python code and zips it automatically on `terraform apply`.
+- Attaches the IAM role from Phase 3.
+- Places Lambda inside the private subnet using the security group from Phase 2.
+- Sets `CUTOFF_DAYS = 365` as an environment variable (can be overridden for testing).
+- `timeout = 300` — gave it 5 minutes to handle large snapshot counts.
+
+---
+
+**A few issues I ran into:**
+
+1. Had to fix the source path for the zip. Initially set it to `${path.module}/lambda` when it needed to be `${path.module}/../lambda`. The `../` is needed because the `terraform/` folder and the `lambda/` folder are siblings, not nested.
+2. Forgot to add `hashicorp/archive` to `provider.tf` — `archive_file` requires it as a provider.
+3. `boto3` wasn't installed locally so the editor was flagging the import. Installed it locally to silence the warning. It's pre-installed in the AWS Lambda runtime so it doesn't need to be bundled.
+
+---
+
+After running terraform commands, the Lambda took ~4 minutes to deploy because AWS had to provision the network interfaces in the subnet first.
+
+`terraform apply` — successful. Lambda is live.
