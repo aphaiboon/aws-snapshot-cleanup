@@ -256,3 +256,18 @@ What it does:
 After running terraform commands, the Lambda took ~4 minutes to deploy because AWS had to provision the network interfaces in the subnet first.
 
 `terraform apply` — successful. Lambda is live.
+
+---
+
+### Feb 20, 2026 @ 1:29 PM — Phase 5
+
+Short phase, daily scheduler. 
+
+Created a `scheduler.tf` with three resources. 
+1. EventBridge rule = schedules the lambda to run daily at 8:00 AM UTC using cron. 
+2. Event Target = schedules the lambda function. (what actually runs on the trigger)
+3. Lambda Permission = gives EventBridge permission to invoke the lambda. Easy to forget, since IAM role covers what lambda can do, eventbridge still needs its own permission. 
+
+Note: Terraform resource is still called `aws_cloudwatch_event_rule` even though aws rebranded to EventBridge.
+
+`terraform apply` - successful. 
