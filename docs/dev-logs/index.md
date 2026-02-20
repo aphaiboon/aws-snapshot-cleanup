@@ -274,7 +274,7 @@ Note: Terraform resource is still called `aws_cloudwatch_event_rule` even though
 
 ---
 
-### Feb 20, 2026 @ 1:29 PM — Phase 6 | Automated Testing
+### Feb 20, 2026 @ 2:01 PM — Phase 6 | Automated Testing
 
 Using pytest + moto to test the handler locally without needing a real AWS account.
 
@@ -300,3 +300,57 @@ All 4 pass.
 ```
 
 ---
+
+### Feb 20, 2026 @ 2:57 PM — Live Test & VPC Endpoint Fix
+
+Going to manually invoke the Lambda against real AWS and confirm it actually runs. Using the CLI:
+
+```bash
+aws lambda invoke --function-name snapshot-cleanup-lambda --region us-east-1 response.json
+aws logs tail /aws/lambda/snapshot-cleanup-lambda --follow --region us-east-1
+```
+
+**Update 1:**
+Seems like I'm getting a weird error about groups. Will report back.
+
+**Update 2:**
+Seems like it just needed to initialize, but now I'm reaching a connect timeout error.
+
+```
+ConnectTimeoutError: Connect timeout on endpoint URL: "https://ec2.us-east-1.amazonaws.com/"
+```
+
+Timing out after ~88 seconds every time. I'm thinking the Lambda doesn't have access to the EC2 API? but why?.. will debug and report back.
+
+**Update 3:**
+Okay so I need a VPC Endpoint for EC2. This creates a private route directly from the VPC to the EC2 API without needing internet. Adding `aws_vpc_endpoint` to `vpc.tf`. Also need to add `enable_dns_support` and `enable_dns_hostnames` to the VPC — without those, private DNS on the endpoint won't work, and `ec2.us-east-1.amazonaws.com` won't resolve to the endpoint's private IP.
+
+`terraform apply` — endpoint created. Invoking again.
+
+**Update 4:**
+I left it running for a second, since it takes a while to run. But it looks like the CLI is timing out?
+
+```
+Read timeout on endpoint URL: "https://lambda.us-east-1.amazonaws.com/..."
+```
+
+Upon research I think the AWS CLI itself is giving up, not Lambda. Adding `--cli-read-timeout 400` to the invoke command. Let's see if it'll work.
+
+**Update 5:**
+Still hitting the same EC2 timeout. Endpoint is created, DNS is set up — what am I missing? Doing a bit more debugging.
+
+**Update 6:**
+Turns out Interface VPC Endpoints need an inbound rule on port 443 to accept HTTPS connections. Lambda and the endpoint share the same security group, but there's no ingress rule so the endpoint's ENI is silently dropping traffic. Adding a self-referencing ingress rule on port 443 (`self = true`) — this allows anything using the same security group to talk to each other on 443.
+
+`terraform apply` — applying now.
+
+**Update 7:**
+It worked!!
+
+```
+[INFO] No snapshots found
+```
+
+This really bothered me. I didn't want to finish the project without actually seeing it run on real AWS. So seeing that log line come through is satisfying. No snapshots in the account obviously, but Lambda ran, hit the EC2 API, got a real response, and logged it correctly.
+
+Phase complete.
