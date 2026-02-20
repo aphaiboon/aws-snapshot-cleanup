@@ -63,6 +63,7 @@ This will create:
 After apply, Terraform outputs the key resource IDs:
 
 ```
+ec2_vpc_endpoint_id        = "vpce-..."
 lambda_role_arn            = "arn:aws:iam::..."
 lambda_security_group_id   = "sg-..."
 private_subnet_id          = "subnet-..."
