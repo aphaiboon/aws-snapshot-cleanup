@@ -150,3 +150,14 @@ Rereading the technical excercise document, I realized I am missing 4 things.
 I have moved the plan into a designated plan.md, and also updated the plan to correctly satisfy needs. 
 
 ---
+
+### Feb 20, 2026 @ 10:52 AM — Phase 1
+
+This phase is to setup all the scaffolding for terraform. I have written the basic code, and made a variables.tf file to be able to replace and utilize variables instead of hardcoding it. 
+
+I have chosen the default zone to be us-east-1 it is the AWS default & this is where AWS releases new services first. If we would like to change it, we can change it via the variables.tf file.
+
+I also left main.tf and outputs.tf empty for the next phases. 
+
+Ran ```terraform plan``` and is a success. Moving on.
+
